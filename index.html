@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Gerenciador de Comandos DML v1.1.0</title>
+<title>Gerenciador de Comandos DML</title>
 <style>
 body {
   font-family: "Segoe UI", sans-serif;
@@ -10,54 +10,100 @@ body {
   margin: 20px;
 }
 input, textarea {
-  width: 100%; border-radius: 6px; border: 1px solid #ccc;
-  padding: 6px; margin-bottom: 6px; font-size: 12px;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  padding: 6px;
+  margin-bottom: 6px;
+  font-size: 12px;
 }
 button {
-  background-color: #0078D4; color: white; border: none;
-  padding: 5px 10px; border-radius: 6px; cursor: pointer;
+  background-color: #0078D4;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
   box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
-  margin-right: 4px; font-size: 11px;
+  margin-right: 4px;
+  font-size: 11px;
 }
-button:hover { background-color: #005A9E; }
+button:hover {
+  background-color: #005A9E;
+}
 .deleteAllButton {
-  background-color: red; color: white; width: 100%;
-  margin-top: 10px; font-size: 13px; padding: 8px;
+  background-color: red;
+  color: white;
+  width: 100%;
+  margin-top: 10px;
+  font-size: 13px;
+  padding: 8px;
 }
 .btnExcluir {
-  background-color: crimson; padding: 3px 5px;
-  font-size: 9px; border-radius: 4px;
+  background-color: crimson;
+  padding: 3px 5px;
+  font-size: 9px;
+  border-radius: 4px;
 }
 table {
-  width: 100%; border-collapse: collapse; background-color: #fff;
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
 }
 th, td {
-  padding: 4px; border: 1px solid #ccc; text-align: left;
-  font-size: 10px; word-break: break-word;
+  padding: 4px;
+  border: 1px solid #ccc;
+  text-align: left;
+  font-size: 10px;
+  word-break: break-word;
 }
-tr.executado { color: #aaaaaa; }
-th { background-color: #e8e8e8; }
-.csv-cell { cursor: pointer; }
-.csv-cell:hover { background-color: #f0f0f0; }
-.container { display: flex; gap: 10px; flex-wrap: wrap; }
-.box { flex: 1; min-width: 400px; }
+tr.executado {
+  color: #aaaaaa;
+}
+th {
+  background-color: #e8e8e8;
+}
+.csv-cell {
+  cursor: pointer;
+}
+.csv-cell:hover {
+  background-color: #f0f0f0;
+}
+.container {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.box {
+  flex: 1;
+  min-width: 400px;
+}
 .scroll-table {
-  max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 4px;
 }
 #saidaComandos {
-  width: 100%; height: 400px; background-color: #fff;
-  border: 1px solid #ccc; padding: 8px; font-family: monospace;
-  font-size: 10px; white-space: pre; overflow-x: auto; overflow-y: auto;
+  width: 100%;
+  height: 400px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 8px;
+  font-family: monospace;
+  font-size: 10px;
+  white-space: pre;
+  overflow-x: auto;
+  overflow-y: auto;
 }
 </style>
 </head>
 <body>
 
-<h3>Gerenciador de Comandos DML v1.1.0</h3>
+<h3>Gerenciador de Comandos DML</h3>
 
 <textarea id="comandoInput" placeholder="Cole aqui seus comandos DML (um por linha)..."></textarea>
 <input type="text" id="nChamadoInput" placeholder="Número do Chamado">
-<input type="text" id="usuarioInput" placeholder="Usuário">
 <input type="text" id="motivoInput" placeholder="Motivo">
 
 <button onclick="salvarComandos()">Salvar</button>
@@ -66,95 +112,91 @@ th { background-color: #e8e8e8; }
 
 <div class="container">
 <div class="box">
-<h4>Painel de Gerenciamento</h4>
-<div class="scroll-table">
-<table id="tabelaComandos">
-<thead>
-<tr>
-<th>ID</th><th>Comando</th><th>Check</th><th>X</th><th>Chamado</th><th>Usuário</th><th>DH</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-</div>
+  <h4>Painel de Gerenciamento</h4>
+  <div class="scroll-table">
+    <table id="tabelaComandos">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Comando</th>
+          <th>Check</th>
+          <th>X</th>
+          <th>Chamado</th>
+          <th>Usuário</th>
+          <th>DH</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </div>
 <div class="box">
-<h4>Saída de Comandos</h4>
-<textarea id="saidaComandos" readonly></textarea><br>
-<button onclick="copiarSaida()">Copiar Saída</button>
-<button onclick="limparSaida()">Limpar</button>
+  <h4>Saída de Comandos</h4>
+  <textarea id="saidaComandos" readonly></textarea><br>
+  <button onclick="copiarSaida()">Copiar Saída</button>
+  <button onclick="limparSaida()">Limpar</button>
 </div>
 </div>
 
-<button class="deleteAllButton" onclick="excluirTodos()">🚫 EXCLUIR TODOS</button>
+<button 
+class="deleteAllButton"
+onclick="excluirTodos()">
+🚫 EXCLUIR TODOS
+</button>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-import { getDatabase, ref, set, update, remove, onValue, get, child, runTransaction } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+import { getDatabase, ref, set, update, remove, onValue, runTransaction, get } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD-GQaF6OTWHwrlQXxHgImju6zfjzCTPbI",
-  authDomain: "dmlh-11a40.firebaseapp.com",
-  databaseURL: "https://dmlh-11a40-default-rtdb.firebaseio.com",
-  projectId: "dmlh-11a40",
-  storageBucket: "dmlh-11a40.appspot.com",
-  messagingSenderId: "803427751545",
-  appId: "1:803427751545:web:9dedec01576fa555fa26a8"
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH_DOMAIN",
+  databaseURL: "SUA_DATABASE_URL",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_BUCKET",
+  messagingSenderId: "SEU_SENDER_ID",
+  appId: "SEU_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let usuarioLogado = null;
-let isAdmin = false;
+let tipoLogado = null;
 
-async function login() {
-  usuarioLogado = prompt("Digite seu usuário:");
-  if (!usuarioLogado) {
-    alert("Login obrigatório");
+async function autenticar() {
+  const login = prompt("Digite seu usuário:").trim();
+  if (!login) {
+    alert("Login obrigatório.");
     location.reload();
-    return;
   }
 
-  const snapshot = await get(ref(db, `usuarios/${usuarioLogado}`));
-  if (!snapshot.exists()) {
-    alert("Usuário não encontrado!");
+  const userRef = ref(db, `usuarios/${login}`);
+  const snap = await get(userRef);
+
+  if (!snap.exists()) {
+    alert("Usuário não encontrado.");
     location.reload();
-    return;
   }
 
-  const dados = snapshot.val();
-  isAdmin = (dados.tipo === "admin");
+  const dados = snap.val();
+  usuarioLogado = login;
+  tipoLogado = dados.tipo;
+  alert(`Bem-vindo ${usuarioLogado} (${tipoLogado})`);
 
-  document.getElementById("usuarioInput").value = usuarioLogado;
-  alert(`Bem-vindo ${usuarioLogado} (${isAdmin ? "Admin" : "User"})`);
+  carregarComandos();
 }
 
-function formatDHAbreviado(dataHora) {
-  const [data, hora] = dataHora.split(' ');
-  const [dia, mes] = data.split('/');
-  const [h, m] = hora.split(':');
-  return `${dia}/${mes} ${h}:${m}`;
-}
-
-function formatarSaidaTexto(linhas) {
-  const resultado = [];
-  linhas.forEach(linha => resultado.push(linha.trim()));
-  return resultado.join('\n');
-}
-
-async function getNextId() {
-  const idRef = ref(db, 'contadores/ultimoId');
-  const result = await runTransaction(idRef, current => (current || 0) + 1);
-  return String(result.snapshot.val()).padStart(5, '0');
-}
+window.onload = autenticar;
 
 window.salvarComandos = async function() {
+  if (!usuarioLogado) return;
+
   const comandosTexto = document.getElementById('comandoInput').value.trim();
   const nChamado = document.getElementById('nChamadoInput').value.trim();
   const motivo = document.getElementById('motivoInput').value.trim();
 
-  if (!comandosTexto || !nChamado || !usuarioLogado || !motivo) {
+  if (!comandosTexto || !nChamado || !motivo) {
     alert("Preencha todos os campos!");
     return;
   }
@@ -164,14 +206,13 @@ window.salvarComandos = async function() {
 
   for (const comando of comandosArray) {
     const novoId = await getNextId();
-    await set(ref(db, 'comandos/' + novoId), {
+    await set(ref(db, `comandos/${novoId}`), {
       id: novoId,
       comando: comando,
-      dataHora: dataHora,
-      nChamado: nChamado,
+      dataHora,
+      nChamado,
       usuario: usuarioLogado,
-      motivo: motivo,
-      p00pr8: "P00PR8",
+      motivo,
       executado: false
     });
   }
@@ -186,65 +227,112 @@ function limparCampos() {
 }
 
 window.atualizarStatus = function(id, status) {
-  if (!isAdmin) {
-    alert("Apenas admin pode alterar status.");
+  if (tipoLogado !== 'admin') {
+    alert("Apenas admin pode marcar.");
     return;
   }
-  const comandoRef = ref(db, 'comandos/' + id);
+  const comandoRef = ref(db, `comandos/${id}`);
   update(comandoRef, { executado: status });
 }
 
 window.excluirComando = function(id) {
-  if (!isAdmin) {
+  if (tipoLogado !== 'admin') {
     alert("Apenas admin pode excluir.");
     return;
   }
-  if (confirm("Deseja excluir este comando?")) {
-    const comandoRef = ref(db, 'comandos/' + id);
+  if (confirm("Excluir este comando?")) {
+    const comandoRef = ref(db, `comandos/${id}`);
     remove(comandoRef);
   }
 }
 
 window.excluirTodos = function() {
-  if (!isAdmin) {
+  if (tipoLogado !== 'admin') {
     alert("Apenas admin pode excluir todos.");
     return;
   }
-  if (confirm("⚠️ Tem certeza que deseja EXCLUIR TODOS os comandos?")) {
-    const comandosRef = ref(db, 'comandos');
+  if (confirm("⚠️ Excluir TODOS os comandos?")) {
+    const comandosRef = ref(db, `comandos`);
     remove(comandosRef);
-    alert("Todos os comandos foram excluídos.");
   }
+}
+
+function carregarComandos() {
+  const comandosRef = ref(db, 'comandos');
+  onValue(comandosRef, snapshot => {
+    const tbody = document.querySelector('#tabelaComandos tbody');
+    const saida = document.getElementById('saidaComandos');
+    tbody.innerHTML = "";
+    const linhasSaida = [];
+
+    const lista = [];
+    snapshot.forEach(childSnapshot => {
+      lista.push(childSnapshot.val());
+    });
+
+    lista.sort((a, b) => {
+      if (a.executado === b.executado) return a.id.localeCompare(b.id);
+      return a.executado ? 1 : -1;
+    });
+
+    lista.forEach(item => {
+      const tr = document.createElement('tr');
+      if (item.executado) tr.classList.add('executado');
+
+      tr.innerHTML = `
+        <td>${item.id}</td>
+        <td class="csv-cell">${item.comando}</td>
+        <td>
+          <input type="checkbox"
+            ${item.executado ? 'checked' : ''}
+            ${tipoLogado === 'admin' ? '' : 'disabled'}
+            onchange="atualizarStatus('${item.id}', this.checked)">
+        </td>
+        <td>
+          ${tipoLogado === 'admin' ? `<button class="btnExcluir" onclick="excluirComando('${item.id}')">X</button>` : ''}
+        </td>
+        <td>${item.nChamado}</td>
+        <td>${item.usuario}</td>
+        <td>${item.dataHora}</td>
+      `;
+      tbody.appendChild(tr);
+
+      if (!item.executado) {
+        linhasSaida.push(item.comando);
+      }
+    });
+
+    saida.value = linhasSaida.join('\n');
+  });
+}
+
+async function getNextId() {
+  const idRef = ref(db, 'contadores/ultimoId');
+  const result = await runTransaction(idRef, current => (current || 0) + 1);
+  return String(result.snapshot.val()).padStart(5, '0');
 }
 
 window.copiarPendentes = function() {
   const linhas = document.querySelectorAll('#tabelaComandos tbody tr');
-  let comandosPendentes = [];
+  const pendentes = [];
   linhas.forEach(tr => {
-    const checkbox = tr.querySelector('input[type="checkbox"]');
-    if (checkbox && !checkbox.checked) {
-      const comando = tr.querySelector('.csv-cell').textContent;
-      comandosPendentes.push(comando);
+    const cb = tr.querySelector('input[type="checkbox"]');
+    if (cb && !cb.checked) {
+      pendentes.push(tr.querySelector('.csv-cell').textContent);
     }
   });
-  if (comandosPendentes.length > 0) {
-    navigator.clipboard.writeText(comandosPendentes.join('\n')).then(() => alert("Copiados!"));
-  } else {
-    alert("Nenhum pendente.");
-  }
+  navigator.clipboard.writeText(pendentes.join('\n')).then(() => alert("Pendentes copiados!"));
 }
 
 window.marcarTodosPendentes = function() {
-  if (!isAdmin) {
-    alert("Apenas admin pode marcar.");
+  if (tipoLogado !== 'admin') {
+    alert("Apenas admin pode marcar todos.");
     return;
   }
-  const linhas = document.querySelectorAll('#tabelaComandos tbody tr');
-  linhas.forEach(tr => {
-    const checkbox = tr.querySelector('input[type="checkbox"]');
-    if (checkbox && !checkbox.checked) {
-      const id = tr.querySelector('td').textContent;
-      atualizarStatus(id, true);
+  document.querySelectorAll('#tabelaComandos tbody tr').forEach(tr => {
+    const cb = tr.querySelector('input[type="checkbox"]');
+    if (cb && !cb.checked) {
+      atualizarStatus(tr.querySelector('td').textContent, true);
     }
   });
 }
@@ -257,58 +345,6 @@ window.copiarSaida = function() {
 window.limparSaida = function() {
   document.getElementById('saidaComandos').value = "";
 }
-
-function carregarComandos() {
-  const comandosRef = ref(db, 'comandos');
-  onValue(comandosRef, snapshot => {
-    const tbody = document.querySelector('#tabelaComandos tbody');
-    const saida = document.getElementById('saidaComandos');
-    tbody.innerHTML = "";
-    const linhasSaida = [];
-
-    const lista = [];
-    snapshot.forEach(childSnapshot => lista.push(childSnapshot.val()));
-
-    lista.sort((a, b) => (a.executado === b.executado ? a.id.localeCompare(b.id) : a.executado ? 1 : -1));
-
-    lista.forEach(item => {
-      const tr = document.createElement('tr');
-      if (item.executado) tr.classList.add('executado');
-
-      tr.innerHTML = `
-      <td>${item.id}</td>
-      <td class="csv-cell">${item.comando}</td>
-      <td><input type="checkbox" ${item.executado ? 'checked' : ''} ${isAdmin ? '' : 'disabled'} onchange="atualizarStatus('${item.id}', this.checked)"></td>
-      <td>${isAdmin ? `<button class="btnExcluir" onclick="excluirComando('${item.id}')">X</button>` : ''}</td>
-      <td>${item.nChamado}</td>
-      <td>${item.usuario}</td>
-      <td>${formatDHAbreviado(item.dataHora)}</td>`;
-      tbody.appendChild(tr);
-
-      if (!item.executado) linhasSaida.push(item.comando);
-    });
-
-    saida.value = formatarSaidaTexto(linhasSaida);
-    adicionarEventosCopia();
-  });
-}
-
-function adicionarEventosCopia() {
-  document.querySelectorAll('.csv-cell').forEach(cell => {
-    cell.addEventListener('dblclick', () => {
-      const text = cell.textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        cell.style.backgroundColor = '#FFFBCC';
-        setTimeout(() => { cell.style.backgroundColor = ''; }, 800);
-      });
-    });
-  });
-}
-
-window.onload = async () => {
-  await login();
-  carregarComandos();
-};
 </script>
 
 </body>
