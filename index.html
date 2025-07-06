@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Gerenciador de Comandos DML</title>
+  <title>Gerenciador de Comandos DML - v1.0.7</title>
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
@@ -100,7 +100,7 @@
 </head>
 <body>
 
-  <h3>Gerenciador de Comandos DML</h3>
+  <h3>Gerenciador de Comandos DML - v1.0.7</h3>
 
   <textarea id="comandoInput" placeholder="Cole aqui seus comandos DML (um por linha)..."></textarea>
   <input type="text" id="nChamadoInput" placeholder="Número do Chamado">
@@ -162,47 +162,18 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  const usuarioLogado = "Helio";
+  let usuarioLogado = "";
+
+  function isAdmin(nome) {
+    const nomeLower = nome.trim().toLowerCase();
+    return nomeLower === "helio2411";
+  }
 
   function formatDHAbreviado(dataHora) {
     const [data, hora] = dataHora.split(' ');
     const [dia, mes] = data.split('/');
     const [h, m] = hora.split(':');
     return `${dia}/${mes} ${h}:${m}`;
-  }
-
-  function formatarSaidaTexto(linhas) {
-    const resultado = [];
-    const cabecalho = 'P_COMANDO;P_DH_AGENDAMENTO;P_NUM_CHAMADO;P_JUSTIFICATIVA;P_LOGIN;BASE(P00PR8)';
-
-    linhas.forEach(linha => {
-      if (linha.trim() === cabecalho) return;
-
-      if (!linha.includes('"')) {
-        resultado.push(linha.trim());
-        return;
-      }
-
-      let linhaProcessada = linha.replace(/""/g, '"');
-      const primeiraAspa = linhaProcessada.indexOf('"');
-      const segundaAspa = linhaProcessada.indexOf('"', primeiraAspa + 1);
-
-      if (segundaAspa === -1) {
-        resultado.push(linhaProcessada.trim());
-        return;
-      }
-
-      const parteComando = linhaProcessada.slice(primeiraAspa, segundaAspa + 1);
-      let restante = linhaProcessada.slice(segundaAspa + 1);
-
-      restante = restante.replace(/^;/, ',');
-      restante = restante.replace(/;/g, ',');
-
-      let linhaFinal = parteComando + restante;
-      resultado.push(linhaFinal.trim());
-    });
-
-    return resultado.join('\n');
   }
 
   async function getNextId() {
@@ -221,6 +192,8 @@
       alert("Preencha todos os campos!");
       return;
     }
+
+    usuarioLogado = usuario;
 
     const dataHora = new Date().toLocaleString('pt-BR');
     const comandosArray = comandosTexto
@@ -253,8 +226,8 @@
   }
 
   window.atualizarStatus = function(id, status) {
-    if (usuarioLogado !== 'admin') {
-      alert("Apenas o admin pode alterar o status.");
+    if (!isAdmin(usuarioLogado)) {
+      alert("Apenas Helio2411 pode alterar status.");
       return;
     }
     const comandoRef = ref(db, 'comandos/' + id);
@@ -262,8 +235,8 @@
   }
 
   window.excluirComando = function(id) {
-    if (usuarioLogado !== 'admin') {
-      alert("Apenas o admin pode excluir.");
+    if (!isAdmin(usuarioLogado)) {
+      alert("Apenas Helio2411 pode excluir.");
       return;
     }
     if (confirm("Deseja excluir este comando?")) {
@@ -273,8 +246,8 @@
   }
 
   window.excluirTodos = function() {
-    if (usuarioLogado !== 'admin') {
-      alert("Apenas o admin pode excluir.");
+    if (!isAdmin(usuarioLogado)) {
+      alert("Apenas Helio2411 pode excluir todos.");
       return;
     }
     if (confirm("⚠️ Tem certeza que deseja EXCLUIR TODOS os comandos?")) {
@@ -282,6 +255,21 @@
       remove(comandosRef);
       alert("Todos os comandos foram excluídos.");
     }
+  }
+
+  window.marcarTodosPendentes = function() {
+    if (!isAdmin(usuarioLogado)) {
+      alert("Apenas Helio2411 pode marcar.");
+      return;
+    }
+    const linhas = document.querySelectorAll('#tabelaComandos tbody tr');
+    linhas.forEach(tr => {
+      const checkbox = tr.querySelector('input[type="checkbox"]');
+      if (checkbox && !checkbox.checked) {
+        const id = tr.querySelector('td').textContent;
+        atualizarStatus(id, true);
+      }
+    });
   }
 
   window.copiarPendentes = function() {
@@ -303,21 +291,6 @@
     } else {
       alert("Nenhum comando pendente encontrado.");
     }
-  }
-
-  window.marcarTodosPendentes = function() {
-    if (usuarioLogado !== 'admin') {
-      alert("Apenas o admin pode marcar.");
-      return;
-    }
-    const linhas = document.querySelectorAll('#tabelaComandos tbody tr');
-    linhas.forEach(tr => {
-      const checkbox = tr.querySelector('input[type="checkbox"]');
-      if (checkbox && !checkbox.checked) {
-        const id = tr.querySelector('td').textContent;
-        atualizarStatus(id, true);
-      }
-    });
   }
 
   window.copiarSaida = function() {
@@ -361,11 +334,11 @@
           <td>
             <input type="checkbox" 
               ${item.executado ? 'checked' : ''} 
-              ${usuarioLogado === 'admin' ? '' : 'disabled'} 
+              ${isAdmin(usuarioLogado) ? '' : 'disabled'} 
               onchange="atualizarStatus('${item.id}', this.checked)">
           </td>
           <td>
-            ${usuarioLogado === 'admin' ? `<button class="btnExcluir" onclick="excluirComando('${item.id}')">X</button>` : ''}
+            ${isAdmin(usuarioLogado) ? `<button class="btnExcluir" onclick="excluirComando('${item.id}')">X</button>` : ''}
           </td>
           <td>${item.nChamado}</td>
           <td>${item.usuario}</td>
@@ -378,7 +351,7 @@
         }
       });
 
-      saida.value = formatarSaidaTexto(linhasSaida);
+      saida.value = linhasSaida.join('\n');
       adicionarEventosCopia();
     });
   }
