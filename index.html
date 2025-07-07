@@ -1,168 +1,151 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Gerenciador de Comandos DML v1.0.0</title>
+<title>Gerenciador DML — Validação Admin</title>
 <style>
-body { font-family: Arial; background: #f3f3f3; margin: 20px; }
-input, textarea { width: 100%; margin-bottom: 6px; padding: 6px; }
-button { margin: 2px; padding: 6px; }
-.deleteAllButton { background: red; color: #fff; width: 100%; margin-top: 10px; }
-.btnExcluir { background: crimson; color: #fff; }
+body { font-family: Arial; margin: 20px; }
+input, textarea { width: 100%; margin: 5px 0; }
+button { margin: 3px; }
+.executado { color: gray; }
 </style>
 </head>
-<body><h3>Gerenciador de Comandos DML</h3>
-<p>Logado como: <span id="usuarioLogado"></span> (<span id="tipoUsuario"></span>)</p><textarea id="comandoInput" placeholder="Comandos DML"></textarea><input id="nChamadoInput" placeholder="Número do Chamado">
-<input id="usuarioInput" placeholder="Usuário">
-<input id="motivoInput" placeholder="Motivo"><button onclick="salvarComandos()">Salvar</button> <button onclick="copiarPendentes()">Copiar Pendentes</button> <button onclick="marcarTodosPendentes()">Marcar Todos</button>
+<body>
+
+<h2>Gerenciador de Comandos DML</h2>
+
+<textarea id="comandoInput" placeholder="Comandos DML"></textarea>
+<input type="text" id="nChamadoInput" placeholder="Número do Chamado">
+<input type="text" id="usuarioInput" placeholder="Usuário">
+<input type="text" id="motivoInput" placeholder="Motivo">
+<button onclick="salvarComandos()">Salvar</button>
+<button onclick="copiarPendentes()">Copiar Pendentes</button>
+<button onclick="marcarTodosPendentes()">Marcar Todos</button>
 
 <div>
-<table id="tabelaComandos" border="1" width="100%">
-<thead><tr><th>ID</th><th>Comando</th><th>✔</th><th>X</th><th>Chamado</th><th>Usuário</th><th>DH</th></tr></thead>
-<tbody></tbody>
+<h4>Comandos</h4>
+<table border="1" width="100%">
+<thead><tr><th>ID</th><th>Comando</th><th>✔</th><th>❌</th><th>Chamado</th><th>Usuário</th><th>Data</th></tr></thead>
+<tbody id="tabelaComandos"></tbody>
 </table>
-</div><textarea id="saidaComandos" readonly></textarea><button onclick="copiarSaida()">Copiar Saída</button> <button onclick="limparSaida()">Limpar</button>
-
-<button class="deleteAllButton" onclick="excluirTodos()">🚫 EXCLUIR TODOS</button>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-import { getDatabase, ref, set, update, remove, onValue, runTransaction, get, child } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+import { getDatabase, ref, set, update, remove, onValue, runTransaction, get } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD-GQaF6OTWHwrlQXxHgImju6zfjzCTPbI",
-  authDomain: "dmlh-11a40.firebaseapp.com",
-  databaseURL: "https://dmlh-11a40-default-rtdb.firebaseio.com",
-  projectId: "dmlh-11a40",
-  storageBucket: "dmlh-11a40.appspot.com",
-  messagingSenderId: "803427751545",
-  appId: "1:803427751545:web:9dedec01576fa555fa26a8"
+  apiKey: "...",
+  authDomain: "...",
+  databaseURL: "...",
+  projectId: "...",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "..."
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let usuarioLogado = "";
-let tipoUsuario = "";
+let usuarioLogado = null;
+let tipoUsuario = 'user';
 
 async function login() {
   usuarioLogado = prompt("Digite seu login:").trim();
-  const snap = await get(child(ref(db), `usuarios/${usuarioLogado}`));
-  if (!snap.exists()) {
+  const usuarioRef = ref(db, `usuarios/${usuarioLogado}`);
+  const snap = await get(usuarioRef);
+  if (snap.exists()) {
+    tipoUsuario = snap.val();
+    alert(`Bem-vindo, ${usuarioLogado} (${tipoUsuario})`);
+    carregarComandos();
+  } else {
     alert("Usuário não encontrado.");
-    location.reload();
-    return;
   }
-  tipoUsuario = snap.val().tipo;
-  document.getElementById("usuarioLogado").textContent = usuarioLogado;
-  document.getElementById("tipoUsuario").textContent = tipoUsuario;
-  carregarComandos();
 }
-
-login();
 
 async function getNextId() {
   const idRef = ref(db, 'contadores/ultimoId');
-  const result = await runTransaction(idRef, current => (current || 0) + 1);
+  const result = await runTransaction(idRef, c => (c || 0) + 1);
   return String(result.snapshot.val()).padStart(5, '0');
 }
 
-window.salvarComandos = async function() {
-  const comandosTexto = comandoInput.value.trim();
-  const nChamado = nChamadoInput.value.trim();
-  const usuario = usuarioInput.value.trim();
-  const motivo = motivoInput.value.trim();
-  if (!comandosTexto || !nChamado || !usuario || !motivo) return alert("Preencha tudo");
-
+async function salvarComandos() {
+  const comandosTexto = document.getElementById('comandoInput').value.trim();
+  const nChamado = document.getElementById('nChamadoInput').value.trim();
+  const usuario = document.getElementById('usuarioInput').value.trim();
+  const motivo = document.getElementById('motivoInput').value.trim();
   const dataHora = new Date().toLocaleString('pt-BR');
-  const comandosArray = comandosTexto.split('\n').map(l => l.trim()).filter(l => l);
-
-  for (const comando of comandosArray) {
+  if (!comandosTexto || !nChamado || !usuario || !motivo) {
+    alert("Preencha todos os campos!"); return;
+  }
+  const comandos = comandosTexto.split('\n').map(c => c.trim()).filter(c => c);
+  for (const comando of comandos) {
     const novoId = await getNextId();
     await set(ref(db, `comandos/${novoId}`), {
-      id: novoId, comando, nChamado, usuario, motivo,
-      dataHora, executado: false, p00pr8: "P00PR8"
+      id: novoId, comando, nChamado, usuario, motivo, dataHora, executado: false
     });
   }
-  limparCampos();
+  carregarComandos();
 }
-
-function limparCampos() {
-  comandoInput.value = "";
-  nChamadoInput.value = "";
-  usuarioInput.value = "";
-  motivoInput.value = "";
-}
-
-window.atualizarStatus = function(id, status) {
-  if (tipoUsuario !== 'admin') return alert("Somente admin.");
-  update(ref(db, `comandos/${id}`), { executado: status });
-}
-
-window.excluirComando = function(id) {
-  if (tipoUsuario !== 'admin') return alert("Somente admin.");
-  if (confirm("Excluir?")) remove(ref(db, `comandos/${id}`));
-}
-
-window.excluirTodos = function() {
-  if (tipoUsuario !== 'admin') return alert("Somente admin.");
-  if (confirm("Excluir todos?")) remove(ref(db, `comandos`));
-}
-
-window.copiarPendentes = function() {
-  const linhas = document.querySelectorAll('#tabelaComandos tbody tr');
-  let pendentes = [];
-  linhas.forEach(tr => {
-    const cb = tr.querySelector('input[type="checkbox"]');
-    if (cb && !cb.checked) pendentes.push(tr.querySelector('.csv-cell').textContent);
-  });
-  navigator.clipboard.writeText(pendentes.join('\n')).then(() => alert("Copiado!"));
-}
-
-window.marcarTodosPendentes = function() {
-  if (tipoUsuario !== 'admin') return alert("Somente admin.");
-  document.querySelectorAll('#tabelaComandos tbody tr').forEach(tr => {
-    const cb = tr.querySelector('input[type="checkbox"]');
-    if (!cb.checked) atualizarStatus(tr.querySelector('td').textContent, true);
-  });
-}
-
-window.copiarSaida = function() {
-  navigator.clipboard.writeText(saidaComandos.value).then(() => alert("Copiado!"));
-}
-
-window.limparSaida = function() { saidaComandos.value = ""; }
 
 function carregarComandos() {
   const comandosRef = ref(db, 'comandos');
   onValue(comandosRef, snap => {
-    const tbody = document.querySelector('#tabelaComandos tbody');
-    tbody.innerHTML = "";
-    const linhasSaida = [];
-
-    const lista = [];
-    snap.forEach(cs => lista.push(cs.val()));
-
-    lista.sort((a,b) => a.id.localeCompare(b.id));
-
-    lista.forEach(item => {
+    const tbody = document.getElementById('tabelaComandos');
+    tbody.innerHTML = '';
+    snap.forEach(child => {
+      const item = child.val();
       const tr = document.createElement('tr');
-      if (item.executado) tr.style.color = '#aaa';
+      if (item.executado) tr.classList.add('executado');
       tr.innerHTML = `
         <td>${item.id}</td>
-        <td class="csv-cell">${item.comando}</td>
-        <td><input type="checkbox" ${item.executado?'checked':''} ${tipoUsuario==='admin'?'':'disabled'} onchange="atualizarStatus('${item.id}', this.checked)"></td>
-        <td>${tipoUsuario==='admin'?`<button class='btnExcluir' onclick="excluirComando('${item.id}')">X</button>`:''}</td>
+        <td>${item.comando}</td>
+        <td><input type="checkbox" ${item.executado ? 'checked' : ''} ${tipoUsuario==='admin'?'':'disabled'} onchange="atualizarStatus('${item.id}', this.checked)"></td>
+        <td>${tipoUsuario==='admin' ? `<button onclick="excluirComando('${item.id}')">X</button>` : ''}</td>
         <td>${item.nChamado}</td>
         <td>${item.usuario}</td>
-        <td>${item.dataHora}</td>`;
-
+        <td>${item.dataHora}</td>
+      `;
       tbody.appendChild(tr);
-
-      if (!item.executado) linhasSaida.push(item.comando);
     });
-
-    saidaComandos.value = linhasSaida.join('\n');
   });
 }
-</script></body>
+
+window.atualizarStatus = function(id, status) {
+  if (tipoUsuario !== 'admin') return;
+  const refComando = ref(db, `comandos/${id}`);
+  update(refComando, { executado: status });
+}
+
+window.excluirComando = function(id) {
+  if (tipoUsuario !== 'admin') return;
+  if (confirm("Excluir?")) {
+    remove(ref(db, `comandos/${id}`));
+  }
+}
+
+window.marcarTodosPendentes = function() {
+  if (tipoUsuario !== 'admin') return;
+  document.querySelectorAll('#tabelaComandos tr').forEach(tr => {
+    const id = tr.children[0].innerText;
+    const cb = tr.querySelector('input[type=checkbox]');
+    if (cb && !cb.checked) {
+      atualizarStatus(id, true);
+    }
+  });
+}
+
+window.copiarPendentes = function() {
+  let txt = '';
+  document.querySelectorAll('#tabelaComandos tr').forEach(tr => {
+    const cb = tr.querySelector('input[type=checkbox]');
+    if (cb && !cb.checked) txt += tr.children[1].innerText+'\n';
+  });
+  navigator.clipboard.writeText(txt.trim());
+  alert("Pendentes copiados");
+}
+
+login();
+</script>
+
+</body>
 </html>
