@@ -160,7 +160,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 const usuarioLogado = "Helio";
-let tipoUsuario = 'user'; // padrão
+let tipoUsuario = 'admin'; // padrão
 
 async function verificarPermissao() {
   const usuarioRef = ref(db, `usuarios/${usuarioLogado}`);
